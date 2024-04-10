@@ -1,0 +1,157 @@
+\section{Research Plan}
+
+%\subsection{From Timed Automata to \framac}
+%\label{sec:ta2framac}
+%\input{automatatoframac}
+
+The core outcome of this project consists of
+  practical methods and a framework for combining formal, static, and dynamic analysis for embedded system software written in C and C++, as well as an open-source software implementation and two real-world case studies.  This section will detail these efforts.
+
+\subsection{DeepState and Automated Test Generation}
+\label{sec:framac2deepstate}
+\input{framactodeepstate}
+
+\subsection{Other DeepState Extensions}
+
+\paragraph{Bounded Model Checking:}
+\input{cbmcplan}
+
+\paragraph{Explicit-State Model Checking:}
+\input{spinplan}
+
+\paragraph{Timed Automata Model Skeleton Generation:}
+As noted above, one of our core assumptions is that timed automata can
+model the underlying protocols in many embedded systems.  However,
+writing timed automata models using \uppaal~\cite{uppaal} and
+\prism~\cite{KNP2011:CAV} is at present a skill only a small number of
+embedded engineers have mastered.  In order to encourage more
+engineers to make use of these powerful formalisms, we propose 1) to
+enable DeepState to generate \emph{traces} of the annotations related
+to timing that are covered during a run and 2) to build a tool to
+combine and reconcile these traces into a skeleton model for \uppaal~\cite{uppaal} or
+\prism~\cite{KNP2011:CAV} (as has been done to some extent for Java~\cite{liva2017extracting}).  The structure of code (function locations
+of DeepState annotations) will be used to form the structure of the
+model.  Additional annotations for, e.g. probabilities, may need to be
+added if not present in the code annotations, though DeepState already
+has a primitive support for expressing probabilities that we plan to extend.
+
+% \paragraph{Other Tools:}  Galois Inc. has expressed strong interest in
+% an (unpaid) ongoing research collaboration to integrate their C and
+% C++ relevant tools into DeepState as well, to support our general vision.
+
+\subsection{Pre-Trained Models to Provide Annotation Assistance}
+
+As noted in the problem statement, while developers are almost all at
+least familiar with writing unit tests, extending this experience to
+annotating embedded code and to writing unit tests \emph{not limited
+  to single concrete values} is a challenge.  While using large
+language models (LLMs) to generate or complete code in critical
+embedded domains is risky, such models do provide a way to support
+developers in testing and verifying their code.
+
+Modern LLMs have been pretrained on millions of source code tokens, thus these models have a strong understanding of code semantics 
+and behavior. This can be seen with CodeBERT~\cite{codebert} embeddings outperforming prior work such as Code2Vec~\cite{code2vec} 
+and TF-IDF~\cite{tfidf}, with the CodeBERT vectors capturing some
+notion of semantic similarity rather than pure token match (as in techniques 
+such as TF-IDF).  These training bases contain a large number of
+tests, with many signals including naming and structure distinguishing
+the test code within these corpuses, making
+models ``aware'' of the tightly constrained nature of test code.
+Thus one can generate entire test suites with a powerful model such as ChatGPT~\cite{gpttestgen, siddiq2023empirical}. 
+Even smaller models, trained with this relationship~\cite{catlm, starcoder} show significant promise, generating tests that compile, execute successfully, and 
+increase coverage.  The context of existing embedded systems code gives LLMs more to work with,
+and the context of existing tests for production code may give LLMs
+even more to work with: LLMs have already been used to augment existing tests
+with (better) oracles~\cite{OracleGEN}.  This is a particulary promising
+application, since the tendency of oracle quality to lag behind code coverage
+is an enduring and under-addressed problem in software
+testing~\cite{MindGap}, and one of the problems our proposal targets.
+
+Again, the task most similar to our approach is that of
+writing property-based tests or fuzz-drivers~\cite{goldstein2022some},
+which, while more developer friendly than any other route to formal
+methods application we know of, is sufficiently novel to discourage
+developers in their first uses.  Generalizing oracle
+generation from specific to parameterized unit tests is a potential
+long-term solution to this problem, and there is already work underway
+to generate fuzz drivers using LLMs~\cite{zhang2023understanding},
+including by Google's OSS-Fuzz team, one of the most important
+industrial fuzzing efforts~\cite{ossfuzzllm}.  PI Groce has recent experience
+using CodeBERT for a different, but related, engineering task
+(predicting the impact of code changes on tests, in particular for
+mutation testing ~\cite{ContextPMT}) and will carry the lessons learned in that work to
+this domain.
+
+We therefore aim to pre-train models (probably based on CodeBERT) both
+for generation of harnesses and code annotations and for use in
+autocompletion of developer-written annotations.  This specialized
+version of the general code-generation task is easier to train and
+evaluate, due to the structural and semantic restrictions of test code
+and specification annotations.  Evaluation of models will be performed
+using both the usual machine-learning methods as in the above
+discussed recent framing work and using the same
+developer/task oriented methods as in our other case-study based work.
+
+\subsection{Dissemination of Software}
+\label{sec:software}
+
+The proposed methods and framework will be incorporated into a usable
+open source tool.
+While individual software components will be developed and evaluated
+in tandem with the research efforts described above, we dedicate a
+task (Task T3 in the workplan given in the separate Collaboration Plan) for consolidating all
+these components in a practical, user-friendly software tool since
+adoption by real-world users is a primary scientific goal of this project.
+To maximize impact, the software will be made publicly available % on GitHub
+using the MIT open source software license.
+We are committed to making software open source as demonstrated by previously released % research
+code \cite{mleplussoftware, bernalMLEToolIntegrated2012a, openbuildnetsoftware, nghiemOpenBuildNetFrameworkDistributed2016}.
+
+
+\subsection{Case Studies} % for Ecological Monitoring and Control}
+\label{sec:case-study}
+
+The above briefly introduces a number of problems that we know in advance must
+be dealt with in order to enable a pathway for combining formal,
+static, and dynamic analysis.    At heart, however, we aim to allow
+case studies to prioritize our efforts, and
+are certain that other challenges will arise during these efforts.
+The studies informing this research are the embedded software of %wireless sensor nodes used in the Southwest Experimental Garden Array (SEGA)~\cite{ClaEtAl11,GhoEtAl2014,BelEtAl2015} and of 
+wireless sensor nodes and mobile robots in the Distributed Sensing \& Computing Over Sparse Environments (DISCOVER) Platform.
+
+\subsubsection{Overview of the DISCOVER Platform}
+\label{sec:cast-study:discover}
+
+DISCOVER %(Distributed Sensing and Computing Over Sparse Environments)
+is a cyber-infrastructure testbed for remote, rural, and sparsely populated areas.
+The project is funded by NSF and led by NAU, whose team includes co-PI Nghiem (co-PI of DISCOVER).
+DISCOVER consists of a fabric of highly configurable Internet-of-Things (IoT) sensor nodes, autonomous and highly capable terrestrial robots and drones, and a heterogeneous wireless network.
+DISCOVER sites will be located at the campuses of NAU, Navajo Technical University, and Clemsom University, as well as several remote sites.
+The platform will enable focused research in many domains, including data science and machine learning, heterogeneous networked services, distributed computing and AI, control, autonomous robots, and in-network computation, among many others.
+%
+We will use DISCOVER for the case studies in this project.
+
+\input{casestudysega}
+
+\subsubsection{Case Study 2: Distributed Coordination in Multi-Robot Systems}
+\label{sec:case-study-robots}
+
+\input{casestudyrobots}
+
+\subsection{Work Plan}
+
+The detailed work plan and evaluation methods for our proposal are
+described, including timelines, in the collaboration plan for this proposal.
+
+%\label{sec:workplan}
+%\input{workplan}
+
+% \section{Contributions to Formal Methods and the Field}
+% \label{sec:contributions}
+% \input{contributions}
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "main"
+%%% End:
