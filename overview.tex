@@ -1,7 +1,81 @@
 \section{Problem Statement, Overview, and Objectives}
 
 %\subsection{Problem Statement}
-\input{problem}
+%\input{problem}
 
-\subsection{Intellectual Merit}
+Developing complex embedded systems software has always posed unusual
+challenges:  because such systems tend to directly impact the physical
+world, they often unusually stringent correctness requirements.
+Conventional software often has the recourse to ``restore to backup''
+or simply reboot; embedded systems software that interacts with
+actuators in addition to sensors constantly faces the problem of
+irrevocable damage to physical systems for which no backup is
+possible.  In the extreme case, such as an embedded system operating
+on a probe orbiting Saturn or a rover on Mars, even post-mortem
+analysis, much less diagnosis and repair, may be impossible after a software error.
+
+On the other hand, such systems often face limitations in terms of
+resources:  hardware, not software, development is often the core
+concern of an embedded systems project.  The exact portion of the NASA
+Curiosity Mars Rover budget devoted to software is difficult to
+ascertain, but it certainly amounts to less than 25\% of the total
+Rover budget, despite being a monumental software
+project~\cite{NASAbudget}.  The actual likely value is somewhere below
+10\%, since the 25\% figure includes all R\&D, design, and spacecraft
+construction costs.
+
+Building software with extremely rigorous correctness requirements,
+often under tight budget constraints relative to total project budget,
+and almost always in low-level languages, using error-prone memory
+allocation methods, where concurrency with real-time constraints is
+also almost always involved, poses a serious challenge indeed.
+
+One way embedded developers meet such challenges is by making use of
+\emph{embedded systems development frameworks:} collections of tools,
+libraries, and processes that streamline the creation of software for
+embedded devices.  Just as web developers make use of web development
+frameworks, embedded developers make use of pre-built functionality beyond the capabilities provided
+by C and C++ standard libraries and conventional real-time operating
+systems such as VxWorks in the form of systems that constrain but ease
+development of the kinds of systems they build.  A key difference
+between, e.g., web development frameworks and embedded systems
+frameworks, however, is that some of the most prominent embedded
+frameworks have a major focus on correctness and reliability, rather
+than simply ease of development.  The high cost of embedded failures
+is to some extent represented in the nature of embedded frameworks.
+
+However, by and large, this focus on specification, correctness, and
+reliability is not connected to state-of-the-art testing methods.
+Embedded systems failures due to very rare circumstances can be
+catastrophic, but widely-used embedded systems frameworks do not
+facilitate testing beyond standard manual unit and integration
+testing methods.  Particularly in concurrent software, or software
+involving manipulation of bit-level data, however, human ingenuity is
+hard-pressed to explore the variety of inputs and hardware failure scenarios that
+embedded systems must handle.  Modern test generation techniques,
+particularly fuzzing, but also including symbolic/concolic execution
+and model checking, are natural fits for these kinds of
+(semi-)exhaustive input explorations, but are 1) not part of the
+reportoire of most embedded systems developers or test engineers and
+2) not always easily adaptable to embedded contexts.  This project
+aims to address this problem by  developing methods and tools for
+\emph{framework-aware fuzzing and lightweight verification}, using
+NASA's FPrime embedded development framework as a central testbed.
+The approach proposed exploits framework-provided constraints and type
+information to generate test harnesses and guide \emph{semantic-aware
+  fuzzing}. With \textbf{DeepState} as the primary interface and
+exploratory integration with C++-capable model checkers, this project combines fuzzing with verification to explore \emph{meaningful} behaviors automatically. Framework metadata provides semantic constraints that focus fuzzers on valid inputs; when data violates preconditions, \emph{precondition mapping} transforms it into satisfying assignments.
+The work also introduces \emph{framework-customized mutation testing},
+defining operators aligned with FPrime’s architecture to guide and
+evaluate testing. Methods will be demonstrated on FPrime deployments
+and generalized to other frameworks.   The end-goal of this project is
+to allow embedded systems developers to employ state-of-the-art
+methods for finding bugs in software systems, in ways that
+automatically leverage the additional information provided by the use
+of embedded systems frameworks, while remaining within the paradigms
+and development practices with which they are familliar.
+
+\subsection{NASA's FPrime Framework}
+
+\section{Intellectual Merit}
 \input{merit}
