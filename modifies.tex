@@ -1,0 +1,5 @@
+\subsection{Framework Integration Example: Modifies Clauses}
+
+\emph{Modifies clauses}~\cite{Meyer1997OOSC,GuttagHorningWing1985Larch} are used to specify which memory locations a function can alter; they have been used in languages since Larch and are a core feature of modern verified languages such as Dafny~\cite{Dafny}.  Modifies clauses are a natural fit for incorporation into the FPrime framework, since FPrime generally encourages developers to avoid dynamic memory allocation after system initialization if at all possible, and in the circumstances where it is required, to make use of the included buffer manager pattern.  This means that the memory usage of every function is generally much easier to determine than with typical C++ software.  Because 
+
+In previous work at NASA JPL, PI Groce made it possible to check modifies clauses for C programs, including in the context of explicit-state model checking~\cite{vmcai08}.  That work relied on the CIL (C Intermediate Language) framework, which is limited to C programs and is now deprecated.  
