@@ -73,9 +73,55 @@ to allow embedded systems developers to employ state-of-the-art
 methods for finding bugs in software systems, in ways that
 automatically leverage the additional information provided by the use
 of embedded systems frameworks, while remaining within the paradigms
-and development practices with which they are familliar.
+and development practices with which they are familliar.  This is part
+of a larger picture of making \emph{advanced software correctness
+  technologies} available to developers who are not software testing
+or verification experts, in a form that combines a \emph{lower cost of
+  adoption} with a \emph{higher benefit for adoption}.
 
 \subsection{NASA's FPrime Framework}
+
+NASA’s FPrime (F')~\cite{fprime,fprimerepo} is a component-oriented,
+model-driven embedded systems framework originally developed at the
+Jet Propulsion Laboratory and now widely adopted across NASA missions
+and by external research groups.  FPrime is not a research project; it
+has been deployed on multiple real missions, including, most notably,
+for the Ingenuity Mars helicoper project~\cite{jpl_ingenuity_fprime}.
+
+An FPrime project is structured
+around a set of independently developed C++ components that
+communicate through typed \emph{ports} (synchronous function-call
+ports or asynchronous message-based ports) combined into a specific deployment through an explicit \emph{topology}. The \emph{F Prime Modeling Language} (FPP)~\cite{FPP} further raises the level of abstraction: developers describe components, port signatures, parameter types, command and telemetry dictionaries, and system topologies in a concise declarative language, from which FPrime’s code generators produce the corresponding C++ scaffolding, XML artifacts, and ground data dictionaries. This modeling layer captures a rich set of semantic constraints that govern legal interactions between components, the structure of messages exchanged at runtime, and the configuration of queues, priorities, and initialization sequences.
+
+Although originally motivated by software reuse, portability, and
+mission robustness, the FPrime architecture inadvertently provides
+exactly the kind of metadata that modern automated test generation
+systems require but usually lack. Typed port definitions, enumerated
+dictionaries, deployment wiring, and initialization constraints define
+a semantic boundary around each component and the system as a
+whole. These boundaries serve as \emph{implicit specifications}: they
+tell developers which values are meaningful, which message sequences
+can occur, and which invariants must hold across components, and often
+(albeit often implicitly) which memory locations a module or function may
+legitimately read or modify. Presently, however, these semantics play almost no role in validation; FPrime projects typically employ only manually written unit tests and hand-coded integration scenarios. Existing fuzzers and model checkers treat the generated C++ as an unstructured program, ignoring the framework-level information that could guide input construction and drastically reduce the search space of tests.
+
+This project directly addresses this gap. By extracting the semantic
+structure encoded in FPrime’s modeling and code-generation pipeline
+(port types, parameter ranges, connection graphs, command/telemetry
+interfaces, and configuration metadata) we can automatically generate
+harnesses that instantiate real FPrime deployments under test and feed
+them with structured, type-correct inputs. These same semantics guide
+\emph{semantic-aware fuzzing}: fuzzers such as DeepState become
+framework-informed, able to focus on inputs that satisfy port
+preconditions or, when random data violates those preconditions,
+transform such data into valid assignments through \emph{precondition
+  mapping}. FPrime’s architecture similarly enables
+\emph{framework-customized mutation testing}: by defining mutation
+operators at the model and component-interface levels, focusing on
+altered port connections, modified queue depths or policies, and
+perturbed command dictionarie, we can create realistic, framework-relevant mutants that measure the adequacy of both developer-written and automatically generated tests.
+
+FPrime thus offers a uniquely suitable foundation for this research: it is modern, actively maintained, mission-proven, and explicitly structured around metadata that can drive automated assurance. By making fuzzing, bounded model checking, and mutation testing sensitive to FPrime’s semantics, we not only improve reliability for missions already depending on FPrime but also establish a general methodology applicable to other embedded systems frameworks. The techniques developed in this project aim to integrate seamlessly into FPrime’s existing workflow, allowing developers to adopt advanced testing and verification methods without leaving the framework ecosystem that already shapes how they design, build, and deploy embedded software.
 
 \section{Intellectual Merit}
 \input{merit}
