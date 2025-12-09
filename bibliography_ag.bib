@@ -3430,6 +3430,21 @@ keywords = {Program analysis, Pseudo-tested methods, Software developers, Softwa
   bibsource    = {dblp computer science bibliography, https://dblp.org}
 }
 
+@article{ESBMC,
+author = {Monteiro, Felipe R. and Gadelha, Mikhail R. and Cordeiro, Lucas C.},
+title = {Model checking C++ programs},
+journal = {Software Testing, Verification and Reliability},
+volume = {32},
+number = {1},
+pages = {e1793},
+keywords = {C++, memory safety, model checking, SMT, software verification},
+doi = {https://doi.org/10.1002/stvr.1793},
+url = {https://onlinelibrary.wiley.com/doi/abs/10.1002/stvr.1793},
+eprint = {https://onlinelibrary.wiley.com/doi/pdf/10.1002/stvr.1793},
+abstract = {Summary In the last three decades, memory safety issues in system programming languages such as C or C++ have been one of the most significant sources of security vulnerabilities. However, there exist only a few attempts with limited success to cope with the complexity of C++ program verification. We describe and evaluate a novel verification approach based on bounded model checking (BMC) and satisfiability modulo theories (SMT) to verify C++ programs. Our verification approach analyses bounded C++ programs by encoding into SMT various sophisticated features that the C++ programming language offers, such as templates, inheritance, polymorphism, exception handling, and the Standard Template Libraries. We formalize these features within our formal verification framework using a decidable fragment of first-order logic and then show how state-of-the-art SMT solvers can efficiently handle that. We implemented our verification approach on top of ESBMC. We compare ESBMC to LLBMC and DIVINE, which are state-of-the-art verifiers to check C++ programs directly from the LLVM bitcode. Experimental results show that ESBMC can handle a wide range of C++ programs, presenting a higher number of correct verification results. Additionally, ESBMC has been applied to a commercial C++ application in the telecommunication domain and successfully detected arithmetic-overflow errors, which could potentially lead to security vulnerabilities.},
+year = {2022}
+}
+
 @inproceedings{DirSwarm,
  author = {Alipour, Mohammad Amin and Groce, Alex and Gopinath, Rahul and Christi, Arpit},
  title = {Generating Focused Random Tests Using Directed Swarm Testing},
