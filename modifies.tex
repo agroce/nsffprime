@@ -2,4 +2,25 @@
 
 \emph{Modifies clauses}~\cite{Meyer1997OOSC,GuttagHorningWing1985Larch} are used to specify which memory locations a function can alter; they have been used in languages since Larch and are a core feature of modern verified languages such as Dafny~\cite{Dafny}.  Modifies clauses are a natural fit for incorporation into the FPrime framework, since FPrime generally encourages developers to avoid dynamic memory allocation after system initialization if at all possible, and in the circumstances where it is required, to make use of the included buffer manager pattern.  This means that the intended memory usage of every function is generally much easier to determine than with typical C++ software.  While FPrime offers guidelines and patterns to reduce the risk of languages such as C and C++ that do not provide memory safety guarantees, those risks remain present.  In the case of FPrime, 
 
-In previous work at NASA JPL, PI Groce made it possible to check modifies clauses for C programs, including in the context of explicit-state model checking~\cite{vmcai08}.  That work relied on the CIL (C Intermediate Language) framework, which is limited to C programs and is now deprecated.  
+In previous work at NASA JPL, PI Groce made it possible to check modifies clauses for C programs, including in the context of explicit-state model checking~\cite{vmcai08}.  That work relied on the CIL (C Intermediate Language) framework, which is limited to C programs and is now deprecated.  In this proposal, in order to show how frameworks can be exploited to provide sophisticated checking for properties, embedded in the source code for a system, an LLVM-pass based equivalent will be developed, providing a way to dynamically establish a set of memory boundaries computed at runtime, and check every memory write (and potentially some reads) for inclusion in the allowed locations.
+
+The proposed work extends the original CIL-based approach in several critical ways. First, the checkable set
+of memory locations to be established for each function via API calls will be derived from
+FPrime’s component metadata: port definitions, buffer allocations, queue depths, and topology wiring all serve
+to define \emph{intended} aliasing and ownership relationships. These will be synthesized automatically into runtime region boundaries for developers to use in the source code. Second, because components often
+interact through message buffers whose layout is generated from FPP models, the pass will leverage that
+generated structure as an authoritative description of which bytes are permissible for a given
+operation. Third, the LLVM instrumentation will support two distinct modes: a debugging mode that eagerly
+checks every write, producing immediate diagnostic traces, and a fuzzing-optimized mode that coalesces
+repeated checks and integrates with sanitizers (e.g., ASan) to minimize performance overhead for fuzzing.  
+
+Finally, to remain consistent with DeepState’s semantics for assumptions and assertions, modify-clause
+violations will be treated in a manner parallel to runtime assertion failures. When the violation arises from
+invalid fuzzer-generated inputs, i.e., when a precondition is unsatisfied, the system can suppress the report. But when a violation occurs on a path reachable from a valid harness entry point,
+the error will be reported as a true bug. This distinction is essential for embedded developers, whose systems
+must avoid memory corruption even in the presence of complex component interactions.  The result will be
+the first demonstration of practical, runtime-enforceable modifies-clause checking for framework-based C++
+embedded systems, and a model for using framework semantics to lift verification mechanisms beyond their
+traditional language-centric formulations.  Moreover, to our knowledge no dynamically configurable runtime checking for modified clauses is available at present, and while requiring more user input and expertise, this work will add to the set of LLVM sanitizers in a powerful way that will be useful beyond the FPrime or embedded community.
+
+Exploring how to make modifies clauses usable and lightweight for developers will help us determine the space of possible additonal runtime checks to implement, and how FPrime or other frameworks can bridge usability gaps by automatically producing reliable annotations for users.  A model for our approach is the ACSL~\cite{ACSL} runtime assertion tooling for the Frama-C analysis framework~\cite{KKP2015:FAC} , though we aim to provide a more developer-friendly approach that leverages embedded frameworks and FPP models to automate annotation, to fully integrate with fuzzers and test generation tools, and to handle C++ (which is handled in a very limited way in Frama-C at present; for instance, modifies/assigns clauses cannot be checked in C++ code) fully.
