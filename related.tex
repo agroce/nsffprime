@@ -1,63 +1,62 @@
 \section{Related Work}
 
-A fundamental goal of this project is to reduce both user effort and
-the opportunity for user effort by allowing minimizing (ideally to
-one) the number of times a user must specify an aspect of system
-correctness.  The principle that important information should have a
-``single point of truth'' is widely accepted in software engineering,
-even in such foundational early advances as avoiding repeated magic
-numbers by the use of named constants.  Such a principle can be
-extended to specification and definition of test harnesses.  Early
-work emphasizing this goal of both reducing work and chance of error
-in specification and test generation included the effort by Groce and
-Joshi to use a single harness for both model-checking and random
-testing, in the verification of the Mars Science Laboratory's file
-system \cite{WODA08,CFV08,AMAI}.  In later work, Groce and Erwig
-extended this idea to propose development of a single language with a
-unified semantics for a wide variety of dynamic test generation tools
-\cite{WODACommon}; this approach is essentially realized in the
-DeepState \cite{DeepState} system.  Indeed, \framac and
-\acsl~\cite{ACSL} and DeepState are both arguably limited
-instantiations of this goal: providing a single language, interface,
-and semantics that is applied to a variety of methods (static or
-dynamic) for checking that a specification holds.  This project aims
-to further extend this goal by extending it to include a formal
-timed-automata model and to connect the primarily static and dynamic approaches.
+This project builds on and integrates prior work in fuzzing, symbolic execution, runtime specification
+checking, and mutation analysis, with a particular emphasis on leveraging structural information provided
+by software frameworks. While each of these areas has an extensive literature, existing techniques
+generally treat programs as unstructured artifacts and fail to exploit the semantic constraints imposed
+by embedded systems frameworks.
 
-The implementation and verification of distributed systems,
-and code extraction from automata modeling in the proof assistant
-\Coq~\cite{WWP2015:PLDI,WWA2016:CPP,DBLP:conf/tacs/Paulin-Mohring01}
-is a topic of some previous work.  Such  proposals require that the developers master \Coq, and start from the modeling activity to generate code.
-They are therefore not applicable in the context of the verification
-of legacy embedded C code, the common case in the real world.
+\paragraph{Fuzzing and Hybrid Test Generation.}
+Coverage-guided fuzzing has proven highly effective at discovering bugs in systems software, particularly
+when augmented with feedback mechanisms such as coverage metrics and path prioritization
+\cite{aflfast}. Hybrid approaches combine fuzzing with symbolic or concolic execution to improve
+path exploration, especially for hard-to-reach code regions \cite{zhao2019send}. However, these
+techniques typically operate on binaries or APIs with minimal semantic context, requiring substantial
+manual effort to construct effective harnesses. In contrast, this proposal leverages framework models
+to automatically generate semantically valid harnesses and guide exploration toward architecturally
+meaningful behaviors.
 
-Testing real-time systems modeled by networks of timed automata was
-investigated by the authors of the tool \uppaal
-\cite{uppaaltron2008,uppaalcover2007,uppaaltron2005} and implemented
-in the tools \uppaal-TRON
-and
-\uppaal-COVER. These tools generate
-tests, either offline or online, for conformance testing of a
-real-time system with respect to its model and an environment model,
-both as timed automaton networks.  In both cases, the real-time system
-is considered a black-box with an input/output interface through which
-the test generator or monitor can change the system inputs and observe
-the system outputs.  The actual implementation code is not considered
-and is in fact hidden from the testing tools.  While this approach is
-general, it has several drawbacks.  It requires a centralized
-input/output interface accessible to the testing tools.  Such an
-interface is not always available in all systems, especially in
-large-scale distributed systems like the sensor/actuator networks
-considered in our case study.  Furthermore, by considering only the
-(timed) input/output behavior of a system, this approach may not be
-able to test internal system behaviors and therefore miss
-opportunities for a better test
-coverage.
+\paragraph{Unit-Level Symbolic Execution and Property-Based Testing.}
+Property-based testing tools such as Hypothesis and PropEr demonstrate the effectiveness of randomized,
+specification-driven testing at the unit level \cite{Hypothesis,PROPER}. DeepState extends this paradigm
+to C and C++ by providing a unit-test–like interface compatible with fuzzing, symbolic execution, and
+model checking backends \cite{DeepState,DeepStateTutorial}. Prior work has shown that DeepState can
+expose subtle bugs in complex systems code, but harness creation and specification remain largely manual.
+The present work extends DeepState by automatically deriving both harnesses and specifications from
+framework-level artifacts.
 
+\paragraph{Runtime Specification and Modifies-Clause Checking.}
+Design-by-contract approaches, originating in Eiffel and Larch, integrate executable specifications such
+as preconditions, postconditions, and modifies clauses into program development
+\cite{Meyer1997OOSC,GuttagHorningWing1985Larch}. Modern verified languages such as Dafny provide
+strong automated support for such specifications \cite{Dafny}, but these techniques are rarely adopted
+in embedded C/C++ systems due to tooling and performance constraints. Prior work demonstrated that
+modifies clauses can be dynamically checked for C programs, even in the context of explicit-state
+model checking. This proposal extends that line of work by using LLVM-based instrumentation and
+framework-derived memory models to make modifies-clause checking practical for modern embedded
+systems.
 
+\paragraph{Mutation Analysis and Test Adequacy.}
+Mutation testing has long been used to assess test suite effectiveness, but traditional mutation operators
+are largely syntactic and language-specific. Empirical studies have examined the relationship between
+mutation scores and real faults \cite{GopinathMutants,ahmed_testedness}, while more recent work has
+explored the interaction between fuzzing and mutation testing \cite{fuzzing22,seip2022}. The
+\texttt{universalmutator} framework was designed to address the limitations of grammar-bound mutation
+tools by enabling domain-specific mutation definitions independent of programming language syntax.
+This proposal builds directly on that foundation to introduce \emph{framework-aware mutation operators}
+that better reflect the fault models of embedded systems.
 
-% ;;; Local Variables: ***
-% ;;; mode: latex ***
-% ;;; eval: (ispell-change-dictionary "english" nil) ***
-% ;;; eval: (flyspell-buffer) ***
-% ;;; End: ***
+\paragraph{Framework-Aware and Model-Based Testing.}
+Model-based testing tools generate tests from explicit behavioral models but typically treat the
+implementation as a black box, requiring redundant modeling effort and offering limited integration
+with implementation-level testing. Recent work on firmware re-hosting and hardware–software boundary
+fuzzing demonstrates the value of abstraction-aware testing \cite{halucinator,song2019periscope}, but
+these approaches do not exploit the rich semantic structure already present in component-based
+frameworks. In contrast, this project treats the framework itself as the model, enabling a unified
+approach to fuzzing, specification checking, and mutation analysis without requiring additional
+developer effort.
+
+In summary, prior work has addressed fuzzing, specification checking, and mutation testing largely in
+isolation. This project is the first to systematically integrate these techniques by exploiting the
+semantic infrastructure of an embedded systems framework, enabling more effective automated
+assurance with lower cost and greater developer adoption.

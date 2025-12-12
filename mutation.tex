@@ -1,0 +1,48 @@
+
+Mutation analysis provides a quantitative measure of test adequacy by introducing small, systematic
+perturbations into a program and evaluating whether the existing tests detect the injected faults.
+Traditional mutation testing tools operate primarily at the source level, applying generic syntactic
+operators such as arithmetic replacement, logical negation, or constant modification. While effective
+for many domains, such operators do not reflect the dominant fault classes in embedded systems
+frameworks, where much of the system’s semantics resides in architectural structure rather than in
+individual expressions.
+
+In frameworks such as FPrime, consequential defects often arise from subtle deviations in
+configuration or interaction patterns: mis-wired ports, altered queue depths, changed command or
+telemetry dictionaries, or incorrect initialization sequencing. These errors are difficult to express
+using conventional mutation operators but correspond closely to real failures observed in deployed
+embedded systems. This motivates the development of \emph{framework-aware mutation operators},
+whose semantics align with the abstractions imposed by the framework itself.
+
+The PI is the creator of \texttt{universalmutator}, a language-agnostic mutation engine designed
+explicitly to support customizable, domain-specific mutation operators. \texttt{universalmutator}
+has been successfully used to generate mutants across a wide range of programming languages and
+domains, demonstrating that mutation operators need not be tied to a specific grammar or compiler
+front end. This flexibility makes \texttt{universalmutator} an ideal platform for implementing
+framework-aware mutation operators for FPrime.
+
+Using \texttt{universalmutator} as the substrate, we will define mutation operators that act on
+framework-relevant artifacts, including:
+\begin{itemize}
+  \item \textbf{Port-level mutations:} swapping or removing connections, altering compatible port
+        types, modifying queue sizes or drop policies for asynchronous ports.
+  \item \textbf{Topology mutations:} re-routing data flow, perturbing component startup order, or
+        replacing active components with passive equivalents.
+  \item \textbf{Command and telemetry mutations:} modifying opcode assignments, parameter ranges,
+        or enumeration definitions in command and telemetry dictionaries.
+  \item \textbf{Resource mutations:} altering buffer capacities and allocation patterns to expose
+        hidden assumptions about resource sufficiency.
+\end{itemize}
+
+Because these mutations operate at the same abstraction level as the developer’s design intent, they
+better model realistic error modes than traditional syntactic mutants. Framework-aware mutation
+analysis thus serves two complementary purposes. First, it provides a meaningful measure of the
+adequacy of both developer-written and automatically generated DeepState tests. Second, surviving
+mutants often indicate implicit or underspecified architectural assumptions, guiding developers
+toward clearer specifications and stronger framework usage.
+
+By building on \texttt{universalmutator}, this project leverages a mature and extensible mutation
+infrastructure, minimizing engineering effort while enabling expressive and precise mutation
+definitions. The result will be the first mutation testing approach that operates natively at the level
+of an embedded systems framework, rather than treating framework-generated code as unstructured
+source.
