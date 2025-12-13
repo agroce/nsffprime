@@ -6,6 +6,33 @@ by software frameworks. While each of these areas has an extensive literature, e
 generally treat programs as unstructured artifacts and fail to exploit the semantic constraints imposed
 by embedded systems frameworks.
 
+\paragraph{Test Harness Generation (classical and LLM-assisted).}
+Automating the construction of test and fuzzing harnesses has received increasing attention because
+manual harness creation is a major impediment to large-scale unit
+fuzzing.  Recent work explores fully automated harness synthesis from unit tests, API usage, or consumer code, and
+introduces semantics-preserving oracle checks to validate generated harnesses \cite{oracle2025}.
+Other systems mine real-world API usage to synthesize harnesses that reflect realistic call sequences
+and data shapes \cite{wildsync2025,bindle2023}.  To our knowledge, no
+work looks to use framework (embedded or other framework), rather than
+simply language level, semantics to
+enhance harness generation, or to incorporate harness generation into
+a framework's existing test workflow.  While developers are
+at least familliar with writing unit tests, a widely studied use of LLMs, few have experience in
+writing property-based tests or fuzzing harnesses~\cite{goldstein2022some}, a different task
+that is often perceived as very difficult.  Generalizing oracle
+generation from specific to parameterized unit tests is a potential
+long-term solution to this problem, and there is already work underway
+to generate fuzz drivers using LLMs~\cite{zhang2023understanding},
+including by Google's OSS-Fuzz team, one of the most important
+industrial fuzzing efforts~\cite{ossfuzzllm}.  However, such methods are not at present repeatable and
+consistent, making them ill-suited for running repeatedly as part of a framework
+workflow, where expectations of consistency and predictability are
+critical.  They are currently best suited for one-time generation of a
+human-modified and maintained harness.  To our knowledge, no previous
+work has aimed to produce harnesses that, via a tool-agnostic layer
+such as DeepState, apply to fuzzing, symbolic execution, and bounded
+or explicit-state model checking.
+
 \paragraph{Fuzzing and Hybrid Test Generation.}
 Coverage-guided fuzzing has proven highly effective at discovering bugs in systems software, particularly
 when augmented with feedback mechanisms such as coverage metrics and path prioritization
