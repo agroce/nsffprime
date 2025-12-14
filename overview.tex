@@ -5,14 +5,15 @@
 
 Developing complex embedded systems software has always posed unusual
 challenges:  because such systems tend to directly impact the physical
-world, they often unusually stringent correctness requirements.
+world, they often have stringent correctness requirements.
 Conventional software often has the recourse to ``restore to backup''
 or simply reboot; embedded systems software that interacts with
 actuators in addition to sensors constantly faces the problem of
 irrevocable damage to physical systems for which no backup is
 possible.  In the extreme case, such as an embedded system operating
 on a probe orbiting Saturn or a rover on Mars, even post-mortem
-analysis, much less diagnosis and repair, may be impossible after a software error.
+analysis, much less diagnosis and repair, may be impossible after a
+catastrophic software error.
 
 On the other hand, such systems often face limitations in terms of
 resources:  hardware, not software, development is often the core
@@ -36,7 +37,7 @@ libraries, and processes that streamline the creation of software for
 embedded devices.  Just as web developers make use of web development
 frameworks, embedded developers make use of pre-built functionality beyond the capabilities provided
 by C and C++ standard libraries and conventional real-time operating
-systems such as VxWorks in the form of systems that constrain but ease
+systems such as VxWorks, in the form of systems that constrain but ease
 development of the kinds of systems they build.  A key difference
 between, e.g., web development frameworks and embedded systems
 frameworks, however, is that some of the most prominent embedded
@@ -52,7 +53,9 @@ facilitate testing beyond standard manual unit and integration
 testing methods.  Particularly in concurrent software, or software
 involving manipulation of bit-level data, however, human ingenuity is
 hard-pressed to explore the variety of inputs and hardware failure scenarios that
-embedded systems must handle.  Modern test generation techniques,
+embedded systems must handle.
+
+Modern test generation techniques,
 particularly fuzzing, but also including symbolic/concolic execution
 and model checking, are natural fits for these kinds of
 (semi-)exhaustive input explorations, but are 1) not part of the
@@ -67,7 +70,7 @@ information to generate test harnesses and guide \emph{semantic-aware
 exploratory integration with C++-capable model checkers, this project combines fuzzing with verification to explore \emph{meaningful} behaviors automatically. Framework metadata provides semantic constraints that focus fuzzers on valid inputs; when data violates preconditions, \emph{precondition mapping} transforms it into satisfying assignments.
 The work also introduces \emph{framework-customized mutation testing},
 defining operators aligned with FPrime’s architecture to guide and
-evaluate testing. Methods will be demonstrated on FPrime deployments
+evaluate testing. Methods will be demonstrated on real FPrime deployments
 and generalized to other frameworks.   The end-goal of this project is
 to allow embedded systems developers to employ state-of-the-art
 methods for finding bugs in software systems, in ways that
@@ -121,7 +124,7 @@ operators at the model and component-interface levels, focusing on
 altered port connections, modified queue depths or policies, and
 perturbed command dictionarie, we can create realistic, framework-relevant mutants that measure the adequacy of both developer-written and automatically generated tests.
 
-FPrime thus offers a uniquely suitable foundation for this research: it is modern, actively maintained, mission-proven, and explicitly structured around metadata that can drive automated assurance. By making fuzzing, bounded model checking, and mutation testing sensitive to FPrime’s semantics, we not only improve reliability for missions already depending on FPrime but also establish a general methodology applicable to other embedded systems frameworks. The techniques developed in this project aim to integrate seamlessly into FPrime’s existing workflow, allowing developers to adopt advanced testing and verification methods without leaving the framework ecosystem that already shapes how they design, build, and deploy embedded software.
+FPrime thus offers a uniquely suitable foundation for this research: it is modern, actively maintained, mission-proven, and explicitly structured around metadata that can drive automated assurance. By making fuzzing, model checking, and mutation testing sensitive to FPrime’s semantics, we not only improve reliability for missions already depending on FPrime but also establish a general methodology applicable to other embedded systems frameworks. The techniques developed in this project aim to integrate seamlessly into FPrime’s existing workflow, allowing developers to adopt advanced testing and verification methods without leaving the framework ecosystem that already shapes how they design, build, and deploy embedded software.
 
 \section{Intellectual Merit}
 \input{merit}
