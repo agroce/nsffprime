@@ -23,13 +23,11 @@ ascertain, but it certainly amounts to less than 25\% of the total
 Rover budget, despite being a monumental software
 project~\cite{NASAbudget}.  The actual likely value is somewhere below
 10\%, since the 25\% figure includes all R\&D, design, and spacecraft
-construction costs.
-
-Building software with extremely rigorous correctness requirements,
+construction costs.  Building software with extremely rigorous correctness requirements,
 often under tight budget constraints relative to total project budget,
 and almost always in low-level languages, using error-prone memory
 allocation methods, where concurrency with real-time constraints is
-also almost always involved, poses a serious challenge indeed.
+also usually involved, poses a serious challenge.
 
 One way embedded developers meet such challenges is by making use of
 \emph{embedded systems development frameworks:} collections of tools,
@@ -92,7 +90,7 @@ has been deployed on multiple real missions, including, most notably,
 for the Ingenuity Mars helicoper project~\cite{jpl_ingenuity_fprime}.
 
 An FPrime project is structured
-around a set of independently developed C++ components that
+around a set of C++ components that
 communicate through typed \emph{ports} (synchronous function-call
 ports or asynchronous message-based ports) combined into a specific deployment through an explicit \emph{topology}. The \emph{F Prime Modeling Language} (FPP)~\cite{FPP} further raises the level of abstraction: developers describe components, port signatures, parameter types, command and telemetry dictionaries, and system topologies in a concise declarative language, from which FPrime’s code generators produce the corresponding C++ scaffolding, XML artifacts, and ground data dictionaries. This modeling layer captures a rich set of semantic constraints that govern legal interactions between components, the structure of messages exchanged at runtime, and the configuration of queues, priorities, and initialization sequences.
 
@@ -122,7 +120,8 @@ transform such data into valid assignments through \emph{precondition
 \emph{framework-customized mutation testing}: by defining mutation
 operators at the model and component-interface levels, focusing on
 altered port connections, modified queue depths or policies, and
-perturbed command dictionaries, we can create realistic, framework-relevant mutants that measure the adequacy of both developer-written and automatically generated tests.
+perturbed command dictionaries, we can create realistic,
+framework-relevant mutants that measure the adequacy of both manual and automatically generated tests.
 
 FPrime thus offers a uniquely suitable foundation for this research: it is modern, actively maintained, mission-proven, and explicitly structured around metadata that can drive automated assurance. By making fuzzing, model checking, and mutation testing sensitive to FPrime’s semantics, we not only improve reliability for missions already depending on FPrime but also establish a general methodology applicable to other embedded systems frameworks. The techniques developed in this project aim to integrate seamlessly into FPrime’s existing workflow, allowing developers to adopt advanced testing and verification methods without leaving the framework ecosystem that already shapes how they design, build, and deploy embedded software.
 
