@@ -25,48 +25,50 @@ Automating application of advanced correctness methods to embedded systems frame
 \begin{figure}[t]
   \hspace{-12pt}
   \begin{subfigure}{0.492\columnwidth}
-  {\scriptsize
-  \begin{code}
-void update\_state(struct state\_t *s, uint64\_t bv) \{
+  {%\scriptsize
+    \begin{code}
+      
+void update\_state(struct state\_t *s,
+         uint64\_t bv) \{
   ASSUME(valid\_state(s));
   ASSUME(valid\_bv(bv));
   ...
 \}
 
-void process\_both\_sensor\_readings(struct state\_t *s) \{
+void proc\_readings(struct state\_t *s) \{
   ASSUME(valid\_state(s)); 
-  uint64\_t s1\_bv = acquire\_s1(), s2\_bv = acquire\_s2();   
-  update\_state(s, s1\_bv);  update\_state(s, s2\_bv);  
+  s1\_bv=acq\_s1(); s2\_bv=acq\_s2();   
+  update\_state(s, s1\_bv);
+  update\_state(s, s2\_bv);  
 \}
   
-void process\_one\_sensor\_reading(struct state\_t *s) \{
+void proc\_reading(struct state\_t *s) \{
   ASSUME(valid\_state(s)); 
-  uint64\_t s1\_bv = acquire\_s1(); 
+  uint64\_t s1\_bv = acq\_s1(); 
   update\_state(s, s1\_bv); 
 \}
 \end{code}
 }
 \end{subfigure}
 \begin{subfigure}{0.492\columnwidth}
-{\scriptsize
+{%\scriptsize
 \begin{code}
-struct state\_t *NewState() \{
-  return DeepState\_Malloc(sizeof(struct state\_t));   
-\}
+
     
-TEST(SensorReading, UpdateNeverSlow) \{
+TEST(SensorReading, NeverSlow) \{
   struct state\_t *s = NewState();
   DeepState\_Timeout(
-    [\&]\{update\_state(s, DeepState\_UInt64());\},
+    [\&]\{update\_state(s,
+    DeepState\_UInt64());\},
     MAX\_EXPECTED\_UPDATE\_TIME);
 \}
 
 TEST(SensorReading, AvoidCrashes) \{
   struct state\_t *s = NewState();
-  for(int i = 0; i < TEST\_LENGTH; i++) \{
+  for(int i=0; i<TEST\_LENGTH; i++) \{
     OneOf(
-        [\&]\{process\_both\_sensor\_readings(s);\},
-        [\&]\{process\_one\_sensor\_reading(s);\});
+        [\&]\{proc\_readings(s);\},
+        [\&]\{proc\_reading(s);\});
   \}
 \} 
 \end{code}
@@ -76,9 +78,9 @@ TEST(SensorReading, AvoidCrashes) \{
   \label{fig:assumption}
   \end{figure}
 
-These concerns require significant advances in several areas of dynamic analysis: first, a complete and principled approach to the problem of handling pre-conditions/assumption semantics, and second, an investigation of how to let fuzzers take advantage of the significant additional structure provided by property-based testing, including such assumptions.  Consider the code in Figure~\ref{fig:assumption} (abstracted away from FPrime details, in order to make the underlying issue, which is not limited to embedded systems frameworks, clear).  This defines two different tests of software that reads sensor values and incorporates them into a system state.  The two tests check two different properties:  {\tt UpdateNeverSlow} ensures that updating the sensor is never too slow.  It is checked, potentially, over \emph{all} valid inputs, not just ones produced by the actual sensor reading code in {\tt acquire\_s1} and {\tt acquire\_s2}.  The second test, {\tt AvoidCrashes} starts the system up in some valid state, and repeatedly either reads both sensors or only sensor one.  There is no explicit property, only the expectation that the system will not crash; tests can be executed using LLVM sanitizers to check for integer overflow and other undefined behavior.  Generating such harnesses automatically is a significant challenge, but our research agenda also includes solving problems that would appear even for manually produced harnesses.  For example, what is the proper semantics of the {\tt ASSUME} in {\tt update\_state}?  It depends on the test.  In {\tt UpdateNeverSlow}, a fuzzer will often generate an input value that violates the (possibly complex) requirements on valid states and sensor readings.  These invalid inputs should not be flagged as bugs (the default behavior of most implementations of {\tt ASSUME}), but instead the test should be \emph{abandoned} without indicating that it failed.  However, in {\tt AvoidCrashes}, since we are not directly generating state values and thus, {\tt update\_state} is not an \emph{entry point} for the test, assumption violations \emph{should} result in failed tests.  We aim to synthesize code to make assumptions automatically take on the proper semantics during test execution (including symbolic execution using constraint solvers).
+These concerns require significant advances in several areas of dynamic analysis: first, a complete and principled approach to the problem of handling pre-conditions/assumption semantics, and second, an investigation of how to let fuzzers take advantage of the significant additional structure provided by property-based testing, including such assumptions.  Consider the code in Figure~\ref{fig:assumption} (abstracted away from FPrime details, in order to make the underlying issue, which is not limited to embedded systems frameworks, clear).  This defines two different tests of software that reads sensor values and incorporates them into a system state.  The two tests check two different properties:  {\tt NeverSlow} ensures that updating the sensor is never too slow.  It is checked, potentially, over \emph{all} valid inputs, not just ones produced by the actual sensor reading code in {\tt acq\_s1} and {\tt acq\_s2}.  The second test, {\tt AvoidCrashes} starts the system up in some valid state, and repeatedly either reads both sensors or only sensor one.  There is no explicit property, only the expectation that the system will not crash; tests can be executed using LLVM sanitizers to check for integer overflow and other undefined behavior.  Generating such harnesses automatically is a significant challenge, but our research agenda also includes solving problems that would appear even for manually produced harnesses.  For example, what is the proper semantics of the {\tt ASSUME} in {\tt update\_state}?  It depends on the test.  In {\tt UpdateNeverSlow}, a fuzzer will often generate an input value that violates the (possibly complex) requirements on valid states and sensor readings.  These invalid inputs should not be flagged as bugs (the default behavior of most implementations of {\tt ASSUME}), but instead the test should be \emph{abandoned} without indicating that it failed.  However, in {\tt AvoidCrashes}, since we are not directly generating state values and thus, {\tt update\_state} is not an \emph{entry point} for the test, assumption violations \emph{should} result in failed tests.  We aim to synthesize code to make assumptions automatically take on the proper semantics during test execution (including symbolic execution using constraint solvers).
 
-This point about preconditions/{\tt ASSUME} brings up a second point.  Preconditions, when they have an {\tt ASSUME} semantics, are fundamentally different than other branches in code.  A fuzzer will attempt to explore the behavior of branches in {\tt valid\_state} and {\tt valid\_bv} just as it explores branches in {\tt update\_state} or {\tt acquire}.  However, it is often possible to enumerate a vast number of paths that differentiate only invalid inputs, and so produce very little real testing.  A classic example is ``testing'' a file system by producing a huge variety of unmountable file system images, rather than actually executing POSIX operations~\cite{CFV08,AMAI}.  In previous work at NASA, on the Curiosity Rover file system, we determined that it was almost impossible to find bugs in the system using symbolic execution or explicit-state model checking if we allowed the system to devote too many resources to exploring mount semantics that did not result in a viable file system.
+This point about preconditions/{\tt ASSUME} brings up a second point.  Preconditions, when they have an {\tt ASSUME} semantics, are fundamentally different than other branches in code.  A fuzzer will attempt to explore the behavior of branches in {\tt valid\_state} and {\tt valid\_bv} just as it explores branches in {\tt update\_state} or {\tt acq}.  However, it is often possible to enumerate a vast number of paths that differentiate only invalid inputs, and so produce very little real testing.  A classic example is ``testing'' a file system by producing a huge variety of unmountable file system images, rather than actually executing POSIX operations~\cite{CFV08,AMAI}.  In previous work at NASA, on the Curiosity Rover file system, we determined that it was almost impossible to find bugs in the system using symbolic execution or explicit-state model checking if we allowed the system to devote too many resources to exploring mount semantics that did not result in a viable file system.
 
 DeepState's harness specification language extends its GoogleTest basis to explicitly mark {\tt ASSUMEs} and indicate which branches are pre-conditions, and so can help avoid this problem.  In some fuzzers, this means prioritizing inputs to mutate based on whether they execute any code other than validity checks; but in fuzzers, such as Angora~\cite{angora} and Eclipser~\cite{eclipser}, that use lightweight constraint-solving to cover branches, the process can be more sophisticated.  We have begun discussions with the Eclipser team, and they confirm that identifying precondition code and devising suitable heuristics to handle it (e.g., never solve for a negation of a passed check) should improve performance.  Fuzzing of individual functions or sets of functions is a highly promising area: most fuzzing is applied at the whole-program level, where input generation can simply be too hard.  By focusing on a middle-ground between unit testing and whole-program fuzzing, essentially using fuzzer technology to drive property-driven testing at the function/FPrime component level, the problem is made tractable.  Prioritizing paths that include more than just input validation is an explicit goal of, e.g., AFLFast~\cite{aflfast}, but it must work with an implicit definition based on path frequencies, while we have access to ground truth.  Given the complexity of state validity checks, there may be hard-to-reach, but uninteresting, ways to create invalid input; AFLFast will \emph{prioritize} such paths, while we will (correctly) avoid them.
 

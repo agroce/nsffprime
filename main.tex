@@ -1,10 +1,17 @@
 \documentclass[11pt]{article}
-%-----------------------------------
+% -----------------------------------
+
+\usepackage[draft]{hyperref}
+
 \input{packages}
 \input{commands}
 \input{titlemacros.tex}
+
+%\hypersetup{draft}
+%\patchcmd{\url}{\hyper@linkurl}{\@gobble}{}{}
 % -----------------------------------
 \renewcommand{\baselinestretch}{.967}
+\let\url\nolinkurl% Make \url be equivalent to \nolinkurl
 %-----------------------------------
 \begin{document}
 %-----------------------------------
